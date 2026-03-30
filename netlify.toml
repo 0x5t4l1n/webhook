@@ -1,0 +1,29 @@
+[build]
+  command = "echo 'No build command needed for static frontend'"
+  publish = "public"
+  functions = "netlify/functions"
+
+[dev]
+  port = 8888
+  publish = "public"
+
+[[redirects]]
+  from = "/api/webhook/:id"
+  to = "/.netlify/functions/webhook?id=:id"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/logs/:id"
+  to = "/.netlify/functions/logs?id=:id"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/clear/:id"
+  to = "/.netlify/functions/clear?id=:id"
+  status = 200
+  force = true
+
+[functions.cleanup]
+  schedule = "0 0 * * *"

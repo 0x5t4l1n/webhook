@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexulean Webhook Inspector</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">Nexulean Webhook Inspector</div>
+        <div class="nav-links">
+            <a href="#">Docs</a>
+            <a href="#">About</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Home View -->
+        <main id="home-view" class="view active">
+            <div class="home-content">
+                <div class="hero">
+                    <h1>Webhook Inspection Platform</h1>
+                    <p>Securely capture and analyze HTTP requests in real-time. No login required. Generate unique endpoints instantly to test your webhook integrations or web applications.</p>
+                </div>
+                
+                <div class="features">
+                    <h2>Features & Capabilities</h2>
+                    <ul>
+                        <li>Unique, disposable webhook URLs</li>
+                        <li>Real-time request capture and monitoring</li>
+                        <li>Full inspection of headers, payload body, and queries</li>
+                        <li>Replay support for debugging workflows</li>
+                        <li>Serverless architecture powered by Netlify</li>
+                    </ul>
+                </div>
+                
+                <div class="cta-section">
+                    <button id="btn-generate" class="btn btn-accent btn-large">
+                        Create Webhook Endpoint
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Dashboard View -->
+        <main id="dashboard-view" class="view">
+            <header class="dashboard-header">
+                <div class="url-box">
+                    <span>Target URL:</span>
+                    <code id="webhook-url"></code>
+                    <button id="btn-copy" class="btn-icon">Copy</button>
+                </div>
+                <div>
+                    <button id="btn-clear" class="btn btn-danger">Clear Logs</button>
+                </div>
+            </header>
+
+            <div class="dashboard-layout">
+                <!-- Left Panel: Request List -->
+                <aside id="left-panel" class="panel">
+                    <div class="panel-title">Request Log</div>
+                    <div class="panel-content" style="padding: 0;">
+                        <ul id="request-list">
+                            <li style="justify-content: center; color: var(--text-secondary); font-style: italic;">
+                                No requests received yet
+                            </li>
+                        </ul>
+                    </div>
+                </aside>
+
+                <!-- Right Panel: Inspection Details -->
+                <section id="right-panel" class="panel">
+                    <div class="panel-title">Inspection Details</div>
+                    <div class="panel-content" id="request-details">
+                        <div class="empty-message">No request selected. Select an entry from the log to view details.</div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Details Template -->
+    <template id="request-details-template">
+        <div class="grid-meta">
+            <div class="meta-item">
+                <span class="meta-label">Request ID</span>
+                <span class="meta-value log-id"></span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Method</span>
+                <span class="meta-value log-method" style="font-weight: bold;"></span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Client IP</span>
+                <span class="meta-value log-ip"></span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Received At</span>
+                <span class="meta-value log-time"></span>
+            </div>
+        </div>
+        
+        <div class="detail-section">
+            <h3>Query Parameters</h3>
+            <pre class="log-query"></pre>
+        </div>
+
+        <div class="detail-section">
+            <h3>HTTP Headers</h3>
+            <pre class="log-headers"></pre>
+        </div>
+
+        <div class="detail-section">
+            <h3>
+                Payload Body
+                <button class="btn-icon copy-body-btn">Copy Raw Data</button>
+            </h3>
+            <pre class="log-body"></pre>
+        </div>
+
+        <div class="actions-row">
+            <button class="btn btn-accent replay-btn">Replay Request</button>
+        </div>
+    </template>
+
+    <script src="app.js"></script>
+</body>
+</html>
