@@ -196,8 +196,23 @@ document.addEventListener('DOMContentLoaded', () => {
             ? JSON.stringify(log.query_params, null, 2) 
             : '{ // No parameters }';
             
-        clone.querySelector('.log-headers').textContent = log.headers && Object.keys(log.headers).length > 0
-            ? JSON.stringify(log.headers, null, 2) 
+        let displayHeaders = log.headers ? { ...log.headers } : {};
+        if (Object.keys(displayHeaders).length > 0) {
+            for (const key in displayHeaders) {
+                const val = displayHeaders[key];
+                if (typeof val === 'string' && val.length > 4 && /^[A-Za-z0-9+/=]+$/.test(val)) {
+                    try {
+                        const decodedStr = atob(val);
+                        if (decodedStr.startsWith('{') || decodedStr.startsWith('[')) {
+                            displayHeaders[key] = JSON.parse(decodedStr);
+                        }
+                    } catch(e) {}
+                }
+            }
+        }
+        
+        clone.querySelector('.log-headers').textContent = Object.keys(displayHeaders).length > 0
+            ? JSON.stringify(displayHeaders, null, 2) 
             : '{ // No headers }';
         
         let bodyDisplay = log.body;
