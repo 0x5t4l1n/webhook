@@ -1,24 +1,54 @@
 const { createClient } = require('@supabase/supabase-js');
+const fs = require('fs');
+const path = require('path');
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_ANON_KEY;
+// Try to load from environment variables first
+let supabaseUrl = process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL;
+let supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.REACT_APP_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY;
+
+// Fallback to .env file if not found in environment
+if (!supabaseUrl || !supabaseKey) {
+    try {
+        const envPath = path.join(__dirname, '../../.env');
+        if (fs.existsSync(envPath)) {
+            const envContent = fs.readFileSync(envPath, 'utf-8');
+            const envLines = envContent.split('\n');
+            for (const line of envLines) {
+                if (line.startsWith('SUPABASE_URL=')) {
+                    supabaseUrl = line.split('=')[1].trim();
+                }
+                if (line.startsWith('SUPABASE_ANON_KEY=')) {
+                    supabaseKey = line.split('=')[1].trim();
+                }
+            }
+            console.log('[db.js] Loaded from .env file');
+        }
+    } catch (err) {
+        console.log('[db.js] Could not read .env file:', err.message);
+    }
+}
+
+// Log environment check
+console.log('[db.js] Supabase URL:', supabaseUrl ? '✓ Set (' + supabaseUrl.substring(0, 20) + '...)' : '✗ Missing');
+console.log('[db.js] Supabase Key:', supabaseKey ? '✓ Set' : '✗ Missing');
 
 // Fail gracefully locally if env vars are missing
 let supabase;
 if (supabaseUrl && supabaseKey) {
-    console.log('Initializing Supabase client with URL:', supabaseUrl);
+    console.log('[db.js] Initializing Supabase client');
     supabase = createClient(supabaseUrl, supabaseKey);
+    console.log('[db.js] ✓ Supabase client initialized successfully');
 } else {
-    console.error('SUPABASE_URL or SUPABASE_ANON_KEY not set. URL:', supabaseUrl, 'Key present:', !!supabaseKey);
+    console.error('[db.js] ✗ Missing credentials - URL:', !!supabaseUrl, 'Key:', !!supabaseKey);
 }
 
 function ensureSupabase() {
     if (!supabase) {
-        const error = new Error('Supabase client not initialized. Ensure SUPABASE_URL and SUPABASE_ANON_KEY are configured in Netlify environment variables.');
-        console.error('ensureSupabase error:', error.message);
+        const error = new Error('Supabase client not initialized. Ensure SUPABASE_URL and SUPABASE_ANON_KEY are configured.');
+        console.error('[db.js] ensureSupabase error:', error.message);
         throw error;
     }
-    console.log('Supabase client verified and ready');
+    console.log('[db.js] ✓ Supabase client ready');
 }
 
 async function saveLog(webhookId, requestData) {
