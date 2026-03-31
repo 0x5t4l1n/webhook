@@ -124,7 +124,28 @@ document.addEventListener('DOMContentLoaded', () => {
              .replace(/"/g, "&quot;")
              .replace(/'/g, "&#039;");
     };
+    const tryDecodeBase64Json = (value) => {
+        if (typeof value !== 'string') return value;
+        try {
+            const decoded = atob(value);
+            return JSON.parse(decoded);
+        } catch (e) {
+            return value;
+        }
+    };
 
+    const decodeQueryParams = (params) => {
+        if (!params || typeof params !== 'object') return params;
+        const decoded = {};
+        Object.entries(params).forEach(([key, value]) => {
+            try {
+                decoded[key] = decodeURIComponent(value);
+            } catch (e) {
+                decoded[key] = value;
+            }
+        });
+        return decoded;
+    };
     const showErrorState = () => {
         requestList.innerHTML = `
             <li style="justify-content: center; color: var(--danger-color); font-style: italic;">
@@ -192,27 +213,26 @@ document.addEventListener('DOMContentLoaded', () => {
         clone.querySelector('.log-ip').textContent = log.ip;
         clone.querySelector('.log-time').textContent = new Date(log.timestamp).toLocaleString();
         
-        clone.querySelector('.log-query').textContent = log.query_params && Object.keys(log.query_params).length > 0 
-            ? JSON.stringify(log.query_params, null, 2) 
+        const decodedQuery = log.query_params && Object.keys(log.query_params).length > 0
+            ? decodeQueryParams(log.query_params)
+            : null;
+
+        const decodedHeaders = log.headers && Object.keys(log.headers).length > 0
+            ? Object.fromEntries(Object.entries(log.headers).map(([key, value]) => {
+                const lowerKey = key.toLowerCase();
+                if (lowerKey === 'x-nf-geo' || lowerKey === 'x-nf-site-info' || lowerKey === 'x-nf-account-info') {
+                    return [key, tryDecodeBase64Json(value)];
+                }
+                return [key, value];
+            }))
+            : null;
+
+        clone.querySelector('.log-query').textContent = decodedQuery
+            ? JSON.stringify(decodedQuery, null, 2)
             : '{ // No parameters }';
             
-        let displayHeaders = log.headers ? { ...log.headers } : {};
-        if (Object.keys(displayHeaders).length > 0) {
-            for (const key in displayHeaders) {
-                const val = displayHeaders[key];
-                if (typeof val === 'string' && val.length > 4 && /^[A-Za-z0-9+/=]+$/.test(val)) {
-                    try {
-                        const decodedStr = atob(val);
-                        if (decodedStr.startsWith('{') || decodedStr.startsWith('[')) {
-                            displayHeaders[key] = JSON.parse(decodedStr);
-                        }
-                    } catch(e) {}
-                }
-            }
-        }
-        
-        clone.querySelector('.log-headers').textContent = Object.keys(displayHeaders).length > 0
-            ? JSON.stringify(displayHeaders, null, 2) 
+        clone.querySelector('.log-headers').textContent = decodedHeaders
+            ? JSON.stringify(decodedHeaders, null, 2)
             : '{ // No headers }';
         
         let bodyDisplay = log.body;

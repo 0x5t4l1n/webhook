@@ -1,5 +1,5 @@
 const { saveLog } = require('./db.js');
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID } = require('crypto');
 
 exports.handler = async (event, context) => {
     // Debug log to Netlify dashboard
@@ -28,7 +28,7 @@ exports.handler = async (event, context) => {
             requestBody = Buffer.from(requestBody, 'base64').toString('utf8');
         }
 
-        const logId = uuidv4();
+        const logId = randomUUID();
         const requestData = {
             id: logId,
             method: event.httpMethod,
