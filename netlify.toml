@@ -9,19 +9,19 @@
 
 [[redirects]]
   from = "/api/webhook/:id"
-  to = "/.netlify/functions/webhook?id=:id"
+  to = "/.netlify/functions/webhook/:id"
   status = 200
   force = true
 
 [[redirects]]
   from = "/api/logs/:id"
-  to = "/.netlify/functions/logs?id=:id"
+  to = "/.netlify/functions/logs/:id"
   status = 200
   force = true
 
 [[redirects]]
   from = "/api/clear/:id"
-  to = "/.netlify/functions/clear?id=:id"
+  to = "/.netlify/functions/clear/:id"
   status = 200
   force = true
 

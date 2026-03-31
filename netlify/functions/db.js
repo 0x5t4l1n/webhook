@@ -9,8 +9,16 @@ if (supabaseUrl && supabaseKey) {
     supabase = createClient(supabaseUrl, supabaseKey);
 }
 
+function ensureSupabase() {
+    if (!supabase) {
+        const error = new Error('Supabase client not initialized. Ensure SUPABASE_URL and SUPABASE_ANON_KEY are configured in Netlify environment variables.');
+        console.error(error);
+        throw error;
+    }
+}
+
 async function saveLog(webhookId, requestData) {
-    if (!supabase) return { error: 'Supabase client not initialized' };
+    ensureSupabase();
 
     const { data, error } = await supabase
         .from('webhook_logs')
@@ -28,11 +36,11 @@ async function saveLog(webhookId, requestData) {
         ]);
     
     if (error) console.error('Error saving log:', error);
-    return data;
+    return { data, error };
 }
 
 async function getLogs(webhookId) {
-    if (!supabase) return [];
+    ensureSupabase();
 
     const { data, error } = await supabase
         .from('webhook_logs')
@@ -42,7 +50,7 @@ async function getLogs(webhookId) {
 
     if (error) {
         console.error('Error getting logs:', error);
-        return [];
+        throw error;
     }
     return data;
 }
