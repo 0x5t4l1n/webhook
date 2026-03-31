@@ -38,16 +38,26 @@ A robust, serverless webhook inspection and logging platform built on **Netlify 
    ```
 
 2. **Environment Variables**:
-   Ensure you add your Supabase credentials in `.env`:
+   Ensure you add your Supabase credentials in `.env` for local testing and in Netlify site settings for production:
    ```env
    SUPABASE_URL=your_supabase_url
    SUPABASE_ANON_KEY=your_supabase_anon_key
    ```
 
+   In Netlify, configure both `SUPABASE_URL` and `SUPABASE_ANON_KEY` under Site settings → Build & deploy → Environment.
+
 3. **Run Locally**:
    ```bash
    npx netlify dev
    ```
+
+4. **Production verification**:
+   - Confirm `SUPABASE_URL` and `SUPABASE_ANON_KEY` are present in Netlify environment variables.
+   - Redeploy the site after adding them.
+   - Use the production webhook endpoint to test, for example:
+     ```bash
+     curl -X POST https://webhook.nexulean.info/api/webhook/test123 -d '{"test":"ok"}' -H 'Content-Type: application/json'
+     ```
 
 4. **Deploy**:
    The project is pre-configured to deploy seamlessly on Netlify. The `netlify.toml` automatically handles redirects from clean URLs (`/api/*`) to the respective `/.netlify/functions/*` paths, alongside setting up the CRON schedule for `cleanup.js`.

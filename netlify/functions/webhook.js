@@ -35,8 +35,9 @@ exports.handler = async (event, context) => {
     try {
         const webhookId = extractWebhookId(event);
         if (!webhookId) {
+            console.error('Webhook ID missing, event.path=', event.path, 'query=', event.queryStringParameters);
             return {
-                statusCode: 400,
+                statusCode: 200,
                 headers: CORS_HEADERS,
                 body: JSON.stringify({ error: 'Missing webhook ID in path or query' })
             };
@@ -46,6 +47,15 @@ exports.handler = async (event, context) => {
         if (event.isBase64Encoded && requestBody) {
             requestBody = Buffer.from(requestBody, 'base64').toString('utf8');
         }
+
+        console.log('Incoming request details:', JSON.stringify({
+            method: event.httpMethod,
+            path: event.path,
+            headers: event.headers,
+            query: event.queryStringParameters,
+            body: requestBody || null,
+            isBase64Encoded: event.isBase64Encoded
+        }));
 
         const logId = randomUUID();
         const requestData = {
@@ -63,9 +73,9 @@ exports.handler = async (event, context) => {
         if (result.error) {
             console.error('Failed to save log:', result.error);
             return {
-                statusCode: 500,
+                statusCode: 200,
                 headers: CORS_HEADERS,
-                body: JSON.stringify({ error: 'Failed to save webhook log' })
+                body: JSON.stringify({ success: false, error: 'Failed to save webhook log' })
             };
         }
 
@@ -78,9 +88,9 @@ exports.handler = async (event, context) => {
     } catch (error) {
         console.error('Error handling webhook request:', error);
         return {
-            statusCode: 500,
+            statusCode: 200,
             headers: CORS_HEADERS,
-            body: JSON.stringify({ error: error.message || 'Internal server error' })
+            body: JSON.stringify({ success: false, error: error.message || 'Internal server error' })
         };
     }
 };

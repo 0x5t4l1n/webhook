@@ -18,9 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Base URL
     const getBaseUrl = () => {
-        const url = new URL(window.location.href);
-        // Fallback for direct testing since user mentions production domain
-        return `${url.protocol}//${url.host}/.netlify/functions/webhook/`;
+        return `${window.location.origin}/api/webhook/`;
     };
 
     // Router
@@ -72,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btnClear.addEventListener('click', async () => {
         if (!confirm('Clear all logs for this endpoint?')) return;
         try {
-            await fetch(`/.netlify/functions/clear/${currentLocalWebhookId}`);
+            await fetch(`/api/clear/${currentLocalWebhookId}`);
             logsCache = [];
             selectedLogId = null;
             renderLogList();
@@ -86,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const fetchLogs = async () => {
         if (!currentLocalWebhookId) return;
         try {
-            const res = await fetch(`/.netlify/functions/logs/${currentLocalWebhookId}`);
+            const res = await fetch(`/api/logs/${currentLocalWebhookId}`);
             if (res.ok) {
                 const logs = await res.json();
                 if (JSON.stringify(logs) !== JSON.stringify(logsCache)) {
