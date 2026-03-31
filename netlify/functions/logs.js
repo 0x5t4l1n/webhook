@@ -9,6 +9,7 @@ const CORS_HEADERS = {
 
 function extractWebhookId(event) {
     if (event.queryStringParameters && event.queryStringParameters.id) {
+        console.log('Extracted webhookId from query:', event.queryStringParameters.id);
         return event.queryStringParameters.id;
     }
 
@@ -17,10 +18,13 @@ function extractWebhookId(event) {
     if (parts.length === 0) return null;
 
     const lastSegment = parts[parts.length - 1];
+    console.log('Path parts:', parts, 'Last segment:', lastSegment);
     return lastSegment === 'logs' ? null : lastSegment;
 }
 
 exports.handler = async (event, context) => {
+    console.log('logs.handler invoked with path:', event.path, 'query:', event.queryStringParameters);
+    
     if (event.httpMethod === 'OPTIONS') {
         return {
             statusCode: 204,
@@ -31,27 +35,32 @@ exports.handler = async (event, context) => {
 
     try {
         const webhookId = extractWebhookId(event);
+        console.log('Extracted webhookId:', webhookId);
+        
         if (!webhookId) {
+            console.error('No webhookId found');
             return {
                 statusCode: 400,
                 headers: CORS_HEADERS,
-                body: JSON.stringify({ error: 'Missing webhook ID in path or query' })
+                body: JSON.stringify({ error: 'Missing webhook ID in path or query', received: { path: event.path, query: event.queryStringParameters } })
             };
         }
 
+        console.log('Fetching logs for webhook:', webhookId);
         const logs = await getLogs(webhookId);
+        console.log('Successfully retrieved', logs ? logs.length : 0, 'logs');
 
         return {
             statusCode: 200,
             headers: CORS_HEADERS,
-            body: JSON.stringify(logs)
+            body: JSON.stringify(logs || [])
         };
     } catch (error) {
-        console.error('Error fetching logs:', error);
+        console.error('Error in logs.handler:', error.message, error.stack);
         return {
             statusCode: 500,
             headers: CORS_HEADERS,
-            body: JSON.stringify({ error: error.message || 'Internal server error' })
+            body: JSON.stringify({ error: error.message || 'Internal server error', details: error.toString() })
         };
     }
 };

@@ -85,8 +85,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!currentLocalWebhookId) return;
         try {
             const res = await fetch(`/api/logs/${currentLocalWebhookId}`);
+            console.log(`Fetch /api/logs/${currentLocalWebhookId} returned status:`, res.status);
+            
             if (res.ok) {
                 const logs = await res.json();
+                console.log('Received logs:', logs);
                 if (JSON.stringify(logs) !== JSON.stringify(logsCache)) {
                     logsCache = logs;
                     renderLogList();
@@ -96,6 +99,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             } else {
+                const errorText = await res.text();
+                console.error(`Fetch failed with status ${res.status}:`, errorText);
                 showErrorState();
             }
         } catch (e) {
